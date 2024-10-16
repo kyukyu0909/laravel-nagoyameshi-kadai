@@ -21,8 +21,8 @@ return new class extends Migration
             $table->string('postal_code');
             $table->string('address');
             $table->string('phone_number');
-            $table->date('birthday');
-            $table->string('occupation');
+            $table->date('birthday')->nullable();
+            $table->string('occupation')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
