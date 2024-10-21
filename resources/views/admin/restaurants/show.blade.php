@@ -46,7 +46,7 @@
                 @endif
 
                 <div class="mb-2">
-                    @if ($restaurant->image !== '')
+                    @if ($restaurant->image_name !== '')
                         <img src="{{ asset('storage/restaurants/' . $restaurant->image_name) }}"  class="w-100">
                     @else
                         <img src="{{ asset('/images/no_image.jpg') }}" class="w-100">

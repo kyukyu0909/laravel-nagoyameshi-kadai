@@ -50,7 +50,7 @@
                     </div>
 
                     <!-- 選択された画像の表示場所 -->
-                    @if ($restaurant->image !== '')
+                    @if ($restaurant->image_name !== '')
                         <div class="row" id="imagePreview"><img src="{{ asset('storage/restaurants/'. $restaurant->image_name) }}" class="mb-3"></div>
                     @else
                         <div class="row" id="imagePreview"></div>

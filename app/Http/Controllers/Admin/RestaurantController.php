@@ -112,7 +112,7 @@ class RestaurantController extends Controller
         if ($request->hasFile('image')) {
             $image = $request->file('image')->store('public/restaurants');
             $restaurant->image_name = basename($image);
-
+            }
         $restaurant->save();
 
         // カテゴリの更新
