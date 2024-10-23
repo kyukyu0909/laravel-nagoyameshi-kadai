@@ -18,6 +18,13 @@ class RestaurantController extends Controller
 
     public function index(Request $request)
     {
+
+        $user = $request->user(); // 現在のユーザーを取得
+        if ($user && $user->is_admin) {
+            // 管理者なら別の処理を行う
+            return redirect('/admin/home');
+        }
+        
         $keyword = $request->keyword;
 
         if ($keyword !== null) {
@@ -26,10 +33,10 @@ class RestaurantController extends Controller
         } else {
             $restaurants = Restaurant::paginate(15);
             $total = Restaurant::count();
-        }
-
-        return view('admin.restaurants.index', compact('restaurants', 'total', 'keyword'));
+        }$total = $restaurants->total();
     }
+         
+
 
     public function show($id)
     {

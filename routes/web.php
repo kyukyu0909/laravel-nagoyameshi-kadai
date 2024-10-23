@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CategoryController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\TermController;
+use App\Http\Controllers\Admin\HomeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -23,6 +24,8 @@ use App\Http\Controllers\Admin\TermController;
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('/home', [HomeController::class, 'index'])->name('home');
 
 Route::get('/user', [UserController::class, 'index']);
 
@@ -72,4 +75,11 @@ Route::prefix('admin/company')->group(function () {
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin'], function () {
     Route::resource('terms', TermController::class);
+});
+
+Route::group(['middleware' => 'guest:admin'], function () {
+    // ここにルーティングを設定する
+    Route::resource('restaurants', Admin\RestaurantController::class);
+    Route::resource('terms', Admin\TermController::class);
+    Route::get('home', [Admin\HomeController::class, 'index'])->name('admin.home');
 });
