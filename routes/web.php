@@ -6,8 +6,8 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\Admin\RestaurantController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CategoryController;
-
-
+use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\TermController;
 
 /*
 |--------------------------------------------------------------------------
@@ -54,7 +54,7 @@ Route::get('admin/restaurants/create', [Admin\RestaurantController::class, 'crea
 
 Route::get('admin/restaurants/show={restaurant}', [Admin\RestaurantController::class, 'show'])->name('admin.restaurants.show');
 
-Route::resource('restaurants', RestaurantController::class, )->only('store', 'update', 'destroy');
+Route::resource('restaurants', RestaurantController::class )->only('store', 'update', 'destroy');
 
 Route::get('admin/restaurants/edit', [Admin\RestaurantController::class, 'edit'])->name('admin.restaurants.edit');
 
@@ -63,3 +63,13 @@ Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin
 });
 
 Route::resource('admin/categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy'])->names('admin.categories');
+
+Route::prefix('admin/company')->group(function () {
+    Route::get('/index', [CompanyController::class, 'index'])->name('admin.company.index');
+    Route::get('/edit/{company}', [CompanyController::class, 'edit'])->name('admin.company.edit');
+    Route::patch('/edit/{company}', [CompanyController::class, 'update'])->name('admin.company.update');
+});
+
+Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin'], function () {
+    Route::resource('terms', TermController::class);
+});
