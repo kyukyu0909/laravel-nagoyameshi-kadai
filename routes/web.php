@@ -84,12 +84,3 @@ Route::prefix('admin/terms')->group(function () {
 });
 
 
-//Route::prefix('admin/company')->group(function () {
-    //Route::get('/index', [CompanyController::class, 'index'])->name('admin.company.index');
-    //Route::get('/edit/{company}', [CompanyController::class, 'edit'])->name('admin.company.edit');
-    //Route::patch('/edit/{company}', [CompanyController::class, 'update'])->name('admin.company.update');
-//});
-
-//Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin'], function () {
-    //Route::resource('terms', TermController::class);
-//});
