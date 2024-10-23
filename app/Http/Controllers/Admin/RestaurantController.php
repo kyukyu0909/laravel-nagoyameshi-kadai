@@ -95,7 +95,7 @@ class RestaurantController extends Controller
         $category_ids = $restaurant->categories->pluck('id')->toArray();
         $regular_holidays = RegularHoliday::all();
 
-        return view('admin.restaurants.edit', compact('restaurant', 'categories', 'category_ids', '$regular_holidays'));
+        return view('admin.restaurants.edit', compact('restaurant', 'categories', 'category_ids', 'regular_holidays'));
     }
 
     public function update(Request $request, string $id)
