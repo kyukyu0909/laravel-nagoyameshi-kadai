@@ -26,7 +26,7 @@ class RestaurantController extends Controller
         if ($request->has('select_sort')) {
             $slices = explode(' ', $request->input('select_sort'));
             $sort_query[$slices[0]] = $slices[1];
-            $sort_query = ['created_at' => 'desc'];
+            $sorted = $request->input('select_sort');
         }
 
         $categories = Category::all();
