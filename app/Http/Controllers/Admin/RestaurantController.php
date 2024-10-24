@@ -11,70 +11,52 @@ use App\Models\RegularHoliday;
 
 class RestaurantController extends Controller
 {
-    public function __construct()
-    {
-        $this->middleware('auth:admin');
-    }
 
-    public function index(Request $request)
-    {
+    public function index(Request $request) {
+        // 検索ボックスに入力されたキーワードを取得する
+        $keyword = $request->input('keyword');
 
-        $user = $request->user(); // 現在のユーザーを取得
-        if ($user && $user->is_admin) {
-            // 管理者なら別の処理を行う
-            return redirect('/admin/home');
-        }
-        
-        $keyword = $request->keyword;
-
-        if ($keyword !== null) {
+        // キーワードが存在すれば検索を行い、そうでなければ全件取得する
+        if ($keyword) {
             $restaurants = Restaurant::where('name', 'like', "%{$keyword}%")->paginate(15);
-            $total = $restaurants->total();
         } else {
             $restaurants = Restaurant::paginate(15);
-            $total = Restaurant::count();
-        }$total = $restaurants->total();
-    }
-         
+        }
 
+        $total = $restaurants->total();
 
-    public function show($id)
-    {
-        $restaurant = Restaurant::findOrFail($id);
-        return view('admin.restaurants.show', compact('restaurant'));
+        return view('admin.restaurants.index', compact('restaurants', 'keyword', 'total'));
     }
 
-    public function create()
-    {
+    public function create() {
         $categories = Category::all();
 
         $regular_holidays = RegularHoliday::all();
-        return view('admin.restaurants.create',compact('categories', 'regular_holidays'));
+
+        return view('admin.restaurants.create', compact('categories', 'regular_holidays'));
     }
 
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $request->validate([
-            'name' =>'required|string|max:255',
-            'description' =>'required',
-            'lowest_price' =>'required|integer',
-            'highest_price' =>'required|integer',
-            'postal_code' =>'required|string',
-            'address' =>'required|string',
-            'opening_time' =>'required',
-            'closing_time' =>'required|date_format:H:i|after:opening_time',
-            'seating_capacity' =>'required|between:0,200|integer',
-            'category_ids' => 'required|array|max:3',  // カテゴリのバリデーション
-            'image'=>'image|max:2048',
+            'name' => 'required',
+            'image' => 'image|max:2048',
+            'description' => 'required',
+            'lowest_price' => 'required|numeric|min:0|lte:highest_price',
+            'highest_price' => 'required|numeric|min:0|gte:lowest_price',
+            'postal_code' => 'required|digits:7',
+            'address' => 'required',
+            'opening_time' => 'required|before:closing_time',
+            'closing_time' => 'required|after:opening_time',
+            'seating_capacity' => 'required|numeric|min:0',
         ]);
 
         $restaurant = new Restaurant();
         $restaurant->name = $request->input('name');
         if ($request->hasFile('image')) {
             $image = $request->file('image')->store('public/restaurants');
-            $restaurant->image_name = basename($image);
+            $restaurant->image = basename($image);
         } else {
-            $restaurant->image_name = '';
+            $restaurant->image = '';
         }
         $restaurant->description = $request->input('description');
         $restaurant->lowest_price = $request->input('lowest_price');
@@ -89,31 +71,46 @@ class RestaurantController extends Controller
         $category_ids = array_filter($request->input('category_ids'));
         $restaurant->categories()->sync($category_ids);
 
-        $regular_holiday_ids = array_filter($request->input('regular_holiday_ids', []));
+        $regular_holiday_ids = $request->input('regular_holiday_ids');
         $restaurant->regular_holidays()->sync($regular_holiday_ids);
 
         return redirect()->route('admin.restaurants.index')->with('flash_message', '店舗を登録しました。');
-        }
+    }
 
-    public function edit($id)
-    {
-        $restaurant = Restaurant::findOrFail($id);
+    public function show(Restaurant $restaurant) {
+        return view('admin.restaurants.show', compact('restaurant'));
+    }
+
+    public function edit(Restaurant $restaurant) {
         $categories = Category::all();
+
+        // 設定されたカテゴリのIDを配列化する
         $category_ids = $restaurant->categories->pluck('id')->toArray();
+
         $regular_holidays = RegularHoliday::all();
 
         return view('admin.restaurants.edit', compact('restaurant', 'categories', 'category_ids', 'regular_holidays'));
     }
 
-    public function update(Request $request, string $id)
-    {
-        $restaurant = Restaurant::findOrFail($id);
-
+    public function update(Request $request, Restaurant $restaurant) {
         $request->validate([
-            'category_ids' => 'required|array|max:3',
+            'name' => 'required',
+            'image' => 'image|max:2048',
+            'description' => 'required',
+            'lowest_price' => 'required|numeric|min:0|lte:highest_price',
+            'highest_price' => 'required|numeric|min:0|gte:lowest_price',
+            'postal_code' => 'required|digits:7',
+            'address' => 'required',
+            'opening_time' => 'required|before:closing_time',
+            'closing_time' => 'required|after:opening_time',
+            'seating_capacity' => 'required|numeric|min:0',
         ]);
 
         $restaurant->name = $request->input('name');
+        if ($request->hasFile('image')) {
+            $image = $request->file('image')->store('public/restaurants');
+            $restaurant->image = basename($image);
+        }
         $restaurant->description = $request->input('description');
         $restaurant->lowest_price = $request->input('lowest_price');
         $restaurant->highest_price = $request->input('highest_price');
@@ -122,26 +119,18 @@ class RestaurantController extends Controller
         $restaurant->opening_time = $request->input('opening_time');
         $restaurant->closing_time = $request->input('closing_time');
         $restaurant->seating_capacity = $request->input('seating_capacity');
-
-        if ($request->hasFile('image')) {
-            $image = $request->file('image')->store('public/restaurants');
-            $restaurant->image_name = basename($image);
-            }
         $restaurant->save();
 
-        // カテゴリの更新
         $category_ids = array_filter($request->input('category_ids'));
         $restaurant->categories()->sync($category_ids);
 
-        $regular_holiday_ids = array_filter($request->input('regular_holiday_ids', []));
-        $restaurant->regular_holidays()->sync($regular_holiday_ids);
++        $regular_holiday_ids = $request->input('regular_holiday_ids');
++        $restaurant->regular_holidays()->sync($regular_holiday_ids);
 
-        return redirect()->route('admin.restaurants.edit', ['restaurant' => $id])->with('flash_message', '店舗を編集しました。');
+        return redirect()->route('admin.restaurants.show', $restaurant)->with('flash_message', '店舗を編集しました。');
     }
 
-    public function destroy($id)
-    {
-        $restaurant = Restaurant::findOrFail($id);
+    public function destroy(Restaurant $restaurant) {
         $restaurant->delete();
 
         return redirect()->route('admin.restaurants.index')->with('flash_message', '店舗を削除しました。');
