@@ -45,6 +45,7 @@ Route::get('/dashboard', function () {
 Route::group(['middleware' => 'guest:admin'], function () {
     Route::get('/home', [HomeController::class, 'index'])->name('home');
     Route::resource('user', UserController::class)->only(['index', 'edit', 'update'])->middleware(['auth', 'verified'])->names('user');
+    Route::resource('restaurants', RestaurantController::class)->only(['index'])->middleware(['auth', 'verified'])->names('restaurants');
 });
 
 require __DIR__.'/auth.php';
