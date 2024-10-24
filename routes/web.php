@@ -66,7 +66,7 @@ Route::resource('restaurants', RestaurantController::class )->only('store', 'upd
 Route::get('admin/restaurants/edit', [Admin\RestaurantController::class, 'edit'])->name('admin.restaurants.edit');
 
 Route::group(['prefix' => 'admin', 'as' => 'admin.', 'middleware' => 'auth:admin'], function () {
-    Route::resource('restaurants', RestaurantController::class);
+    Route::resource('restaurants', Admin\RestaurantController::class);
 });
 
 Route::resource('admin/categories', CategoryController::class)->only(['index', 'store', 'update', 'destroy'])->names('admin.categories');
@@ -82,5 +82,7 @@ Route::prefix('admin/terms')->group(function () {
     Route::get('/edit', [TermController::class, 'edit'])->name('admin.terms.edit');
     Route::patch('/edit', [TermController::class, 'update'])->name('admin.terms.update');
 });
+
+
 
 
