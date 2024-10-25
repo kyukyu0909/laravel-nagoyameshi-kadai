@@ -16,6 +16,6 @@ class HomeController extends Controller
         // $new_restaurantsから最新の6件を取得する
         $new_restaurants = Restaurant::orderBy('id', 'desc')->take(6)->get();
 
-        return view('home', compact('highly_rated_restaurants', 'categories', 'new_restaurants'));
+        return view('/home', compact('highly_rated_restaurants', 'categories', 'new_restaurants'));
     }
 }
